@@ -1,0 +1,568 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2017-09-04 月 16:20 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>無人航空機の軌道生成法</title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="桑村航矢" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { width: 90%; }
+  /*]]>*/-->
+</style>
+<link rel="stylesheet" type="text/css" href="http://gongzhitaao.org/orgcss/org.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.10.0/highlight.min.js"></script>
+<script>var hlf=function(){Array.prototype.forEach.call(document.querySelectorAll("pre.src"),function(t){var e;e=t.getAttribute("class"),e=e.replace(/src-(\w+)/,"src-$1 $1"),t.setAttribute("class",e),hljs.highlightBlock(t)})};addEventListener("DOMContentLoaded",hlf);</script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.10.0/styles/googlecode.min.css" />
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2013 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        displayAlign: "center",
+        displayIndent: "0em",
+
+        "HTML-CSS": { scale: 100,
+                        linebreaks: { automatic: "false" },
+                        webFont: "TeX"
+                       },
+        SVG: {scale: 100,
+              linebreaks: { automatic: "false" },
+              font: "TeX"},
+        NativeMML: {scale: 100},
+        TeX: { equationNumbers: {autoNumber: "AMS"},
+               MultLineWidth: "85%",
+               TagSide: "right",
+               TagIndent: ".8em"
+             }
+});
+</script>
+<script type="text/javascript"
+        src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML"></script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">無人航空機の軌道生成法</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#orgeadfbb1">1. 理論</a>
+<ul>
+<li><a href="#org6d295b2">1.1. 線形最適軌道</a></li>
+<li><a href="#org9c9b5bf">1.2. 非線形最適軌道</a></li>
+</ul>
+</li>
+<li><a href="#org83054e8">2. コード詳細</a>
+<ul>
+<li><a href="#org6187a42">2.1. 最適軌道の算出ステップ</a></li>
+<li><a href="#org6596092">2.2. <code>bool PolynomialOptimization&lt;_N&gt;::solveLinear()</code></a></li>
+<li><a href="#org9ba1d33">2.3. メモ</a>
+<ul>
+<li><a href="#orgc081328">2.3.1. QR 分解</a></li>
+<li><a href="#orgd7640ca">2.3.2. 単語</a></li>
+<li><a href="#org60f9525">2.3.3. resize</a></li>
+<li><a href="#orge5ddfe5">2.3.4. 最適化</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+
+<div id="outline-container-orgeadfbb1" class="outline-2">
+<h2 id="orgeadfbb1"><span class="section-number-2">1</span> 理論</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+文献<a class='org-ref-reference' href="#Richter2016">Richter2016</a>, <a class='org-ref-reference' href="#Burri2015">Burri2015</a>, <a class='org-ref-reference' href="#Mellinger2011">Mellinger2011</a> を基に理論式を整理
+する．
+</p>
+</div>
+
+<div id="outline-container-org6d295b2" class="outline-3">
+<h3 id="org6d295b2"><span class="section-number-3">1.1</span> 線形最適軌道</h3>
+<div class="outline-text-3" id="text-1-1">
+<p>
+N-1 次元の多項式を以下のように示す．
+</p>
+\begin{align}
+  p(t) &= \boldsymbol{c} \cdot \boldsymbol{t}\\
+  \boldsymbol{t} &= [1 ~t ~t^2 ~\cdots ~t^{N-1}]\\
+  \boldsymbol{c} &= [c_0 ~\cdots ~c_{N-1}]^{\mathrm{T}}
+\end{align}
+
+<p>
+今，軌道がD 個のM次元の多項式で構成されているとすると，
+全体の評価式は，
+</p>
+\begin{equation}
+  \label{eq-j_pol1}
+  J_{polynomials} = \sum_{i =1}^M \sum_{d =1}^D
+  \int_0^{T_{s,i}} \sum_{j=0}^{N-1} \left \| \frac{d^j p_{i,d}(t)}{dt^j}\right \| \cdot w_j
+\end{equation}
+
+<p>
+このとき，\(i\) 個目の多項式の評価関数は，
+</p>
+\begin{align}
+  J_{i} &= \int_0^T w_0 ~p(t)^2 + w_1 ~p'(t)^2\\ \nonumber
+       & + w_2 ~p''(t)^2 + \cdots + w_N ~p^{(N)}(t)^2\\ \nonumber
+       &= \boldsymbol{c}_{i}^{\mathrm{T}} ~Q(T) ~\boldsymbol{c}_{i}
+\end{align}
+
+<p>
+ここでスナップ（加速度の微分の微分）を最小化する軌道を考えるので，
+\(w_4 =1\) として，その他の\(w_j\) はすべてゼロに設定する．
+</p>
+
+<p>
+このとき，式(\ref{eq-j_pol1})は
+</p>
+\begin{align}
+  &J_{polynomials} =\\ \nonumber
+  &\begin{bmatrix}
+    \boldsymbol{c}_{1,4}\\
+    \vdots\\
+    \boldsymbol{c}_{M,4}
+  \end{bmatrix}
+  \begin{bmatrix}
+    Q_{1}(T_1) & & \\
+    & \ddots&\\
+    & & Q_M(T_M)
+  \end{bmatrix}
+  \begin{bmatrix}
+    \boldsymbol{c}_{1,4}\\
+    \vdots\\
+    \boldsymbol{c}_{M,4}
+  \end{bmatrix}^{\mathrm{T}}
+\end{align}
+
+<p>
+次に，任意の点を多項式軌道が通過する制約条件として
+</p>
+\begin{equation}
+  A_i c_i = d_i, ~
+  A_i =
+  \begin{bmatrix}
+    A_0\\
+    A_T
+  \end{bmatrix}, ~
+    d_i =
+  \begin{bmatrix}
+    d_0\\
+    d_T
+  \end{bmatrix}
+\end{equation}
+<p>
+が導入される．
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Symbol</th>
+<th scope="col" class="org-left">Defenition</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">\(A\)</td>
+<td class="org-left">多項式の変数と多項式の導関数の間の遷移行列</td>
+</tr>
+
+<tr>
+<td class="org-left">\(d_i\)</td>
+<td class="org-left">\(i_{th}\) 番目の線分の最初（\(d_0\) ） 最後（\(d_T\) ）の微分値を含む</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+
+
+<div id="outline-container-org9c9b5bf" class="outline-3">
+<h3 id="org9c9b5bf"><span class="section-number-3">1.2</span> 非線形最適軌道</h3>
+<div class="outline-text-3" id="text-1-2">
+<p>
+到達時間を評価式に導入する場合は
+</p>
+\begin{equation}
+  \label{eq-j_pol2}
+  J = J_{polynomials} + k_{T} \cdot \left( \sum_{i=1}^{M} T_{s,i}\right)^2
+\end{equation}
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org83054e8" class="outline-2">
+<h2 id="org83054e8"><span class="section-number-2">2</span> コード詳細</h2>
+<div class="outline-text-2" id="text-2">
+</div><div id="outline-container-org6187a42" class="outline-3">
+<h3 id="org6187a42"><span class="section-number-3">2.1</span> 最適軌道の算出ステップ</h3>
+<div class="outline-text-3" id="text-2-1">
+<ol class="org-ol">
+<li><code>opt.setupFromVertices(polynomial_vertices_, segment_times, kDerivativeToOptimize);</code></li>
+<li><code>opt.solveLinear();</code></li>
+<li><code>opt.getTrajectory(&amp;polynomial_trajectory_)</code></li>
+</ol>
+
+<div class="org-src-container">
+<pre class="src src-C++">// Optimize the polynomial trajectory.
+// Position.
+std::vector&lt;double&gt; segment_times;
+segment_times =
+    estimateSegmentTimes(polynomial_vertices_, reference_speed_,
+                         reference_acceleration_, kFabianConstant);
+mav_trajectory_generation::PolynomialOptimization&lt;kPolynomialCoefficients&gt;
+    opt(kDimensions);
+opt.setupFromVertices(polynomial_vertices_, segment_times,
+                      kDerivativeToOptimize);
+opt.solveLinear();
+opt.getTrajectory(&amp;polynomial_trajectory_)
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org6596092" class="outline-3">
+<h3 id="org6596092"><span class="section-number-3">2.2</span> <code>bool PolynomialOptimization&lt;_N&gt;::solveLinear()</code></h3>
+<div class="outline-text-3" id="text-2-2">
+<div class="org-src-container">
+<pre class="src src-C++">template &lt;int _N&gt;
+bool PolynomialOptimization&lt;_N&gt;::solveLinear() {
+  CHECK(derivative_to_optimize_ &gt;= 0 &amp;&amp;
+        derivative_to_optimize_ &lt;= kHighestDerivativeToOptimize);
+  // Catch the fully constrained case:
+  if (n_free_constraints_ == 0) {
+    LOG(WARNING)
+        &lt;&lt; "No free constraints set in the vertices. Polynomial can "
+           "not be optimized. Outputting fully constrained polynomial.";
+    updateSegmentsFromCompactConstraints();
+    return true;
+  }
+
+  // TODO(acmarkus): figure out if sparse becomes less efficient for small
+  // problems, and switch back to dense in case.
+
+  // Compute cost matrix for the unconstrained optimization problem.
+  // Block-wise H = A^{-T}QA^{-1} according to [1]
+  Eigen::SparseMatrix&lt;double&gt; R;
+  constructR(&amp;R);
+
+  // Extract block matrices and prepare solver.
+  Eigen::SparseMatrix&lt;double&gt; Rpf = R.block(
+      n_fixed_constraints_, 0, n_free_constraints_, n_fixed_constraints_);
+  Eigen::SparseMatrix&lt;double&gt; Rpp =
+      R.block(n_fixed_constraints_, n_fixed_constraints_, n_free_constraints_,
+              n_free_constraints_);
+  Eigen::SparseQR&lt;Eigen::SparseMatrix&lt;double&gt;, Eigen::COLAMDOrdering&lt;int&gt;&gt;
+      solver;
+      solver.compute(Rpp);
+
+  // Compute dp_opt for every dimension.
+  for (size_t dimension_idx = 0; dimension_idx &lt; dimension_; ++dimension_idx) {
+    Eigen::VectorXd df =
+        -Rpf * fixed_constraints_compact_[dimension_idx];  // Rpf = Rfp^T
+    free_constraints_compact_[dimension_idx] =
+        solver.solve(df);  // dp = -Rpp^-1 * Rpf * df, 線形方程式を逆行列を求めずに解く.
+  }
+
+  updateSegmentsFromCompactConstraints();
+  return true;
+}
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org9ba1d33" class="outline-3">
+<h3 id="org9ba1d33"><span class="section-number-3">2.3</span> メモ</h3>
+<div class="outline-text-3" id="text-2-3">
+</div><div id="outline-container-orgc081328" class="outline-4">
+<h4 id="orgc081328"><span class="section-number-4">2.3.1</span> QR 分解</h4>
+<div class="outline-text-4" id="text-2-3-1">
+<p>
+<a href="https://ja.wikipedia.org/wiki/%E8%A1%8C%E5%88%97%E3%81%AE%E5%88%86%E8%A7%A3#QR.E5.88.86.E8.A7.A3">wikipedia</a> より 
+</p>
+<blockquote>
+<p>
+同様に，QR分解は A を直交行列 Q と上三角行列 R の積 QRとして表す． 
+系 Q(Rx) = b は Rx = tQb = c によって解かれ， 
+系 Rx = cは後退代入によって解かれる． 
+必要な加法と乗法の回数はLU分解のときの約2倍だが， 
+QR分解は数値的に安定なため不正確な計算においてより多くの桁数が必要とならない．
+</p>
+</blockquote>
+</div>
+</div>
+
+<div id="outline-container-orgd7640ca" class="outline-4">
+<h4 id="orgd7640ca"><span class="section-number-4">2.3.2</span> 単語</h4>
+<div class="outline-text-4" id="text-2-3-2">
+<ul class="org-ul">
+<li>vertex &#x2026; 頂点</li>
+<li>segment &#x2026; 線分</li>
+</ul>
+
+<pre class="example">
+  x----------x-----------------x
+vertex            segment
+</pre>
+</div>
+</div>
+
+<div id="outline-container-org60f9525" class="outline-4">
+<h4 id="org60f9525"><span class="section-number-4">2.3.3</span> resize</h4>
+<div class="outline-text-4" id="text-2-3-3">
+<p>
+要素数を変更する
+</p>
+
+<p>
+<a href="https://cpprefjp.github.io/reference/vector/resize.html">参考サイト</a>
+</p>
+</div>
+</div>
+
+<div id="outline-container-orge5ddfe5" class="outline-4">
+<h4 id="orge5ddfe5"><span class="section-number-4">2.3.4</span> 最適化</h4>
+<div class="outline-text-4" id="text-2-3-4">
+<ul class="org-ul">
+<li><a href="http://www.me.titech.ac.jp/~mizu_lab/text.html">学習・研究用テキスト(最適化,線形計画法,内点法,数理計画法)</a></li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: 桑村航矢</p>
+<p class="date">Created: 2017-09-04 月 16:20</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>
